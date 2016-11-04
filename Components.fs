@@ -68,7 +68,7 @@ type UnicornBox(canvasContainer: HTMLElement) =
             fun() ->
                 let i = (JS.Math.random() * 1000. |> int) % sounds.Length
                 Audio.Create(sounds.[i]).play()
-        let rec addUnicorn(oldx?: int, oldy?: int) =
+        let rec addUnicorn() =
             let pic = Container()
             let p = Sprite(img)
             p.anchor.x <- 0.5
@@ -76,16 +76,12 @@ type UnicornBox(canvasContainer: HTMLElement) =
             let scale = JS.Math.random() + 0.25
             pic.addChild(p) |> ignore
             pic.addChild(Text("corn!",[TextStyle.Align "center"; TextStyle.Font "bold italic 300%"; TextStyle.Fill (U2.Case1 (randomColor()))], position=Point(0., 100.), anchor=Point(0.5, 0.5))) |> ignore
-            match oldX with
-            | x -> pic.position.x <- x
-            | pic.position.x <- JS.Math.random() * 400.
-            match oldY with
-            | y -> pic.position.y <- y
-            | pic.position.y <- JS.Math.random() * 400.
+            pic.position.x <- JS.Math.random() * 400.
+            pic.position.y <- JS.Math.random() * 400.
             pic.scale <- Point(scale, scale)
             pic?velocity <- scale
             let onclick() =
-              addUnicorn(pic.x, pic.y)
+              addUnicorn()
               pic?velocity <- (pic?velocity |> unbox<float>) * -1. + (JS.Math.random() * 0.20 - 0.10)
               p.scale.x <- p.scale.x * -1. // flip pic but not text
               p.scale.x <- p.scale.x / 2.
