@@ -68,22 +68,28 @@ type UnicornBox(canvasContainer: HTMLElement) =
             fun() ->
                 let i = (JS.Math.random() * 1000. |> int) % sounds.Length
                 Audio.Create(sounds.[i]).play()
-        let rec addUnicorn() =
+        let rec addUnicorn(oldx?: int, oldy?: int) =
             let pic = Container()
             let p = Sprite(img)
             p.anchor.x <- 0.5
             p.anchor.y <- 0.5
             let scale = JS.Math.random() + 0.25
             pic.addChild(p) |> ignore
-            pic.addChild(Text("neigh!",[TextStyle.Align "center"; TextStyle.Font "bold italic 300%"; TextStyle.Fill (U2.Case1 (randomColor()))], position=Point(0., 100.), anchor=Point(0.5, 0.5))) |> ignore
-            pic.position.x <- JS.Math.random() * 400.
-            pic.position.y <- JS.Math.random() * 400.
+            pic.addChild(Text("corn!",[TextStyle.Align "center"; TextStyle.Font "bold italic 300%"; TextStyle.Fill (U2.Case1 (randomColor()))], position=Point(0., 100.), anchor=Point(0.5, 0.5))) |> ignore
+            match oldX with
+            | x -> pic.position.x <- x
+            | pic.position.x <- JS.Math.random() * 400.
+            match oldY with
+            | y -> pic.position.y <- y
+            | pic.position.y <- JS.Math.random() * 400.
             pic.scale <- Point(scale, scale)
             pic?velocity <- scale
             let onclick() =
-              addUnicorn()
+              addUnicorn(pic.x, pic.y)
               pic?velocity <- (pic?velocity |> unbox<float>) * -1. + (JS.Math.random() * 0.20 - 0.10)
               p.scale.x <- p.scale.x * -1. // flip pic but not text
+              p.scale.x <- p.scale.x / 2.
+              p.scale.y <- p.scale.y / 2.
             pic.on_click (fun e -> onclick()) |> ignore
             pic.on_tap(fun e -> onclick()) |> ignore
             pic.interactive <- true
@@ -97,7 +103,9 @@ type UnicornBox(canvasContainer: HTMLElement) =
         let rec animate(dt:float) =
             animate_id <- window.requestAnimationFrame(FrameRequestCallback animate)
             for pic in pics do
-                pic.position.x <- (pic.position.x + (float speed * (pic?velocity |> unbox))) // use scale as a speed constant too, so little horses go slower
+                pic.position.x <- 5.0 + (pic.position.x + (float speed * (pic?velocity |> unbox))) // use scale as a speed constant too, so little horses go slower
+                if pic.position.y < 500. then
+                    pic.position.y <- pic.position.y + 1.0
                 if (pic.position.x > (renderer.view.width + pic.width * 0.5)) && (pic?velocity |> unbox<float>) > 0. then // right wrap
                     pic.position.x <- pic.width * -0.5
                 if (pic.position.x < abs pic.width * -0.5) && (pic?velocity |> unbox<float>) < 0. then // left wrap
