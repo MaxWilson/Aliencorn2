@@ -43,7 +43,7 @@ type UnicornBox(canvasContainer: HTMLElement) =
         countingText.anchor.y <- 1.
         stage.addChild(countingText) |> ignore
         let pics = System.Collections.Generic.List<_>()
-        let img = Texture.fromImage("Unicorn.png")
+        let img = Texture.fromImage("aliencorn.png")
         let randomColor =
             let colors = [
                 "blue"
@@ -61,17 +61,7 @@ type UnicornBox(canvasContainer: HTMLElement) =
                 colors.[i]
         let randomNeigh =
             let sounds = [
-                    "Horse1.mp3"
-                    "Horse2.mp3"
-                    "Horse1.mp3"
-                    "Horse2.mp3"
-                    "Horse1.mp3"
-                    "Horse2.mp3"
-                    "Horse1.mp3"
-                    "Horse2.mp3"
-                    "Horse1.mp3"
-                    "Horse2.mp3"
-                    "MeowMeowMeowMeow.mp3"
+                    "Aliencorn.m4a"
                 ]
             for s in sounds do
                 Audio.Create(s).load() // pre-load all the sounds
