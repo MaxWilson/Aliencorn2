@@ -28,6 +28,7 @@ type UnicornBox(canvasContainer: HTMLElement) =
         canvasContainer.appendChild(renderer.view) |> ignore
         let stage = Container()
         let mutable count = 0
+        let mutable score = 0
         let countingText =
             Fable.Import.PIXI.Text("Xpos: 0",
                 [
@@ -42,6 +43,17 @@ type UnicornBox(canvasContainer: HTMLElement) =
         countingText.anchor.x <- 0.5
         countingText.anchor.y <- 1.
         stage.addChild(countingText) |> ignore
+        let scoreText =
+            PIXI.Text("Score: 0",
+                [
+                    TextStyle.Font "bold italic 24px Arial"
+                    TextStyle.Fill (U2.Case1 "#3e1707")
+                    TextStyle.Align "center"
+                    TextStyle.Stroke (U2.Case1 "#a4410e")
+                    TextStyle.StrokeThickness 7.
+                ])
+        scoreText.position <- Point(100., 20.)
+        stage.addChild(scoreText) |> ignore
         let pics = System.Collections.Generic.List<_>()
         let img = Texture.fromImage("aliencorn.png")
         let randomColor =
@@ -81,18 +93,22 @@ type UnicornBox(canvasContainer: HTMLElement) =
             pic.scale <- Point(scale, scale)
             pic?velocity <- scale
             let onclick() =
-              addUnicorn()
-              pic?velocity <- (pic?velocity |> unbox<float>) * -1. + (JS.Math.random() * 0.20 - 0.10)
-              p.scale.x <- p.scale.x * -1. // flip pic but not text
-              p.scale.x <- p.scale.x / 2.
-              p.scale.y <- p.scale.y / 2.
+              score <- score + 100
+              if p.scale.y <= 0.6 then
+                  stage.removeChild(pic) |> ignore
+              else
+                  addUnicorn()
+                  pic?velocity <- (pic?velocity |> unbox<float>) * -1. + (JS.Math.random() * 0.20 - 0.10)
+                  p.scale.x <- p.scale.x * -1. // flip pic but not text
+                  p.scale.x <- p.scale.x / 2.
+                  p.scale.y <- p.scale.y / 2.
             pic.on_click (fun e -> onclick()) |> ignore
             pic.on_tap(fun e -> onclick()) |> ignore
             pic.interactive <- true
             stage.addChild(pic) |> ignore
             pics.Add(pic)
             count <- count + 1
-            countingText.text <- sprintf "%d little unicorns, running down the field..." count
+            countingText.text <- sprintf "%d little aliens, descending from space..." count
             randomNeigh()
         addUnicorn() // add one unicorn to start with
 
@@ -100,12 +116,17 @@ type UnicornBox(canvasContainer: HTMLElement) =
             animate_id <- window.requestAnimationFrame(FrameRequestCallback animate)
             for pic in pics do
                 pic.position.x <- 5.0 + (pic.position.x + (float speed * (pic?velocity |> unbox))) // use scale as a speed constant too, so little horses go slower
-                if pic.position.y < 500. then
+                if pic.position.y < 600. then
                     pic.position.y <- pic.position.y + 1.0
+                else
+                    score <- score - 100
+                    stage.removeChild(pic) |> ignore
+                    pics.Remove(pic) |> ignore
                 if (pic.position.x > (renderer.view.width + pic.width * 0.5)) && (pic?velocity |> unbox<float>) > 0. then // right wrap
                     pic.position.x <- pic.width * -0.5
                 if (pic.position.x < abs pic.width * -0.5) && (pic?velocity |> unbox<float>) < 0. then // left wrap
                     pic.position.x <- (renderer.view.width + (abs pic.width * 0.5))
+            scoreText.text <- sprintf "Score: %d" score
             renderer.render(stage)
 
         animate 0. // start a pixi animation loop
