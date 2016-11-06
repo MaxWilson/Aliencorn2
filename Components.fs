@@ -96,6 +96,7 @@ type UnicornBox(canvasContainer: HTMLElement) =
               score <- score + 100
               if p.scale.x > 0. && p.scale.x <= 0.6 then
                   stage.removeChild(pic) |> ignore
+                  pics.Remove(pic) |> ignore
               else
                   addUnicorn()
                   pic?velocity <- (pic?velocity |> unbox<float>) * -1. + (JS.Math.random() * 0.20 - 0.10)
@@ -112,6 +113,8 @@ type UnicornBox(canvasContainer: HTMLElement) =
             randomNeigh()
         addUnicorn() // add one unicorn to start with
 
+
+        let mutable gameOver = false
         let rec animate(dt:float) =
             animate_id <- window.requestAnimationFrame(FrameRequestCallback animate)
             for pic in pics do
@@ -127,6 +130,22 @@ type UnicornBox(canvasContainer: HTMLElement) =
                 if (pic.position.x < abs pic.width * -0.5) && (pic?velocity |> unbox<float>) < 0. then // left wrap
                     pic.position.x <- (renderer.view.width + (abs pic.width * 0.5))
             scoreText.text <- sprintf "Score: %d" score
+            if pics.Count = 0 && not gameOver then
+                gameOver <- true
+                let gameOverText =
+                    PIXI.Text(sprintf "GAME OVER\nScore: %d" score,
+                        [
+                            TextStyle.Font "bold italic 60px Arial"
+                            TextStyle.Fill (U2.Case1 "#3e1707")
+                            TextStyle.Align "center"
+                            TextStyle.Stroke (U2.Case1 "#a4410e")
+                            TextStyle.StrokeThickness 7.
+                        ])
+                gameOverText.position <- Point(300., 200.)
+                stage.addChild(gameOverText) |> ignore
+            scoreText.position <- Point(100., 20.)
+            stage.addChild(scoreText) |> ignore
+
             renderer.render(stage)
 
         animate 0. // start a pixi animation loop
