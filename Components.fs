@@ -94,7 +94,7 @@ type UnicornBox(canvasContainer: HTMLElement) =
             pic?velocity <- scale
             let onclick() =
               score <- score + 100
-              if p.scale.y <= 0.6 then
+              if p.scale.x > 0. && p.scale.x <= 0.6 then
                   stage.removeChild(pic) |> ignore
               else
                   addUnicorn()
